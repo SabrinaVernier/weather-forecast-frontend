@@ -1,0 +1,28 @@
+@import './base.css';
+
+* {
+  box-sizing: border-box;
+}
+
+:root {
+  --coral: coral;
+}
+
+body {
+  font-family: 'Gill Sans', 'Gill Sans MT', sans-serif;
+}
+
+:is(h1, h2, h3) {
+  font-family: monospace;
+}
+
+h1 {
+  font-size: 36px;
+  margin: 20px;
+  text-align: center;
+}
+
+h2 {
+  font-size: 24px;
+  margin: 10px 0;
+}
