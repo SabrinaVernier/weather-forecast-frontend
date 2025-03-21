@@ -12,6 +12,10 @@
   },
   "dependencies": {
     "@api/starryai": "file:.api/apis/starryai",
+    "@fortawesome/fontawesome-svg-core": "^1.2.36",
+    "@fortawesome/free-regular-svg-icons": "^5.15.4",
+    "@fortawesome/free-solid-svg-icons": "^5.15.4",
+    "@fortawesome/vue-fontawesome": "^3.0.8",
     "axios": "^1.8.3",
     "leaflet": "^1.9.4",
     "vue": "^3.5.13",

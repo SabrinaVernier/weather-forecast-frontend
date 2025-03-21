@@ -30,7 +30,7 @@ const prevWeather = async () => {
     </section>
 
     <section class="search">
-      <h1>Quel temps fait-il ?</h1>
+      <h1>Quel temps fera-t'il ?</h1>
       <form @submit.prevent="prevWeather">
         <label> <input type="text" v-model="city" name="city" placeholder="Paris" /></label>
         <button>Rechercher</button>

@@ -7,7 +7,7 @@
     <div>
       <RouterLink :to="{ name: 'home' }">accueil</RouterLink>
       <RouterLink :to="{ name: 'weather' }">Météo</RouterLink>
-      <RouterLink :to="{ name: 'login' }">Page</RouterLink>
+      <RouterLink :to="{ name: 'login' }">Prévision</RouterLink>
     </div>
   </header>
 </template>
