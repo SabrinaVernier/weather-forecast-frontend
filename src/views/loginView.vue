@@ -53,40 +53,43 @@ const indexDay = (index) => {
 
     <section v-if="currentWeather" class="forecast">
       <div
+        class="per day"
         @click="indexDay(currentWeather.forecast.forecastday.indexOf(day))"
         v-for="day in currentWeather.forecast.forecastday"
         :key="day"
       >
-        <div class="per day">
-          <p>{{ currentWeather.forecast.forecastday.indexOf(day) }}</p>
-          <p>{{ day.date }}</p>
-          <p>{{ day.day.condition.text }}</p>
-          <img :src="day.day.condition.icon" alt="icon weather" />
-          <div>
-            <p>{{ day.day.maxtemp_c }} °C /</p>
-            <p>{{ day.day.mintemp_c }} °C</p>
-          </div>
-          <div>
-            <p>{{ day.day.maxwind_kph }} km/h</p>
-          </div>
-          <div>
-            <p>{{ day.day.totalprecip_mm }} mm</p>
-            <p>{{ day.day.avghumidity }} %</p>
-          </div>
+        <p>{{ currentWeather.forecast.forecastday.indexOf(day) }}</p>
+        <p>{{ day.date }}</p>
+        <p>{{ day.day.condition.text }}</p>
+        <img :src="day.day.condition.icon" alt="icon weather" />
+        <div>
+          <p>{{ day.day.maxtemp_c }} °C /</p>
+          <p>{{ day.day.mintemp_c }} °C</p>
         </div>
-
-        <!-- <div class="per-hour result" v-if="displayPerHour">
-          <div v-for="hour in currentWeather.forecast.forecastday[dayIndex].hour" :key="hour">
-            <p>{{ hour.time }}</p>
-          </div>
-        </div> -->
+        <div>
+          <p>{{ day.day.maxwind_kph }} km/h</p>
+        </div>
+        <div>
+          <p>{{ day.day.totalprecip_mm }} mm</p>
+          <p>{{ day.day.avghumidity }} %</p>
+        </div>
       </div>
     </section>
 
     <section class="result">
-      <div class="per-hour" v-if="currentWeather && displayPerHour">
-        <div v-for="hour in currentWeather.forecast.forecastday[dayIndex].hour" :key="hour">
+      <div v-if="currentWeather && displayPerHour">
+        <div
+          class="per-hour"
+          v-for="hour in currentWeather.forecast.forecastday[dayIndex].hour"
+          :key="hour"
+        >
           <p>{{ hour.time }}</p>
+          <p>{{ hour.condition.text }}</p>
+          <img :src="hour.condition.icon" alt="icon weather" />
+          <p>{{ hour.temp_c }} °C</p>
+          <p>{{ hour.wind_kph }} km/h</p>
+          <p>{{ hour.wind_dir }}</p>
+          <p>{{ hour.is_day }}</p>
         </div>
       </div>
     </section>
@@ -98,12 +101,6 @@ main {
   display: flex;
   flex-direction: column;
   gap: 50px;
-}
-
-.result {
-  height: 200px;
-  margin-top: 100px;
-  border: 5px solid plum;
 }
 
 /* ---forecast--- */
@@ -119,7 +116,21 @@ main {
 /* --per-day */
 
 /* ---per-hour */
-/* .per-hour {
-  display: none;
-} */
+
+.result {
+  height: 200px;
+  margin-top: 100px;
+  border: 5px solid plum;
+}
+
+.result > div {
+  display: flex;
+  overflow: scroll;
+}
+
+.result > div > div {
+  border: 1px solid #000;
+  padding: 10px;
+  flex-shrink: 0;
+}
 </style>
