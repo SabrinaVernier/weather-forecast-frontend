@@ -8,6 +8,8 @@ import { library } from '@fortawesome/fontawesome-svg-core'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 
 import {
+  faCloud,
+  faCloudRain,
   faLocationArrow,
   faMapMarkerAlt,
   faStar,
@@ -31,6 +33,8 @@ library.add(
   faLocationArrow,
   faSun,
   faStar,
+  faCloud,
+  faCloudRain,
 )
 
 const app = createApp(App)
