@@ -1,15 +1,16 @@
 <script setup>
 import { RouterLink } from 'vue-router'
 
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 
 import axios from 'axios'
 
 const currentWeather = ref(null)
 const displayPerHour = ref(false)
 const dayIndex = ref(null)
-const city = ref('')
-const days = ref(1)
+const city = ref('Narbonne')
+const days = ref(3)
+const qualityAirValue = ref('')
 
 const prevWeather = async () => {
   const url = 'http://api.weatherapi.com/v1'
@@ -31,6 +32,52 @@ const prevWeather = async () => {
 const indexDay = (index) => {
   displayPerHour.value = true
   dayIndex.value = index
+}
+
+// ---fonction pour avoir date au bon format--------
+const goodDate = computed(() => {
+  let date = ''
+
+  for (const day of currentWeather.value.forecast.forecastday) {
+    // console.log(day.date)
+    date = day.date
+  }
+  return date.split(' ')[0].split('-').reverse().join('/')
+})
+
+// ---fonction pour avoir date au bon format avec heure--------
+const goodDateHour = computed(() => {
+  let date = ''
+  let hour = ''
+
+  console.log(currentWeather.value.forecast.forecastday[dayIndex.value].hour)
+  console.log(dayIndex.value)
+
+  for (const day of currentWeather.value.forecast.forecastday[dayIndex.value].hour) {
+    // console.log(day.time)
+    date = day.time
+    hour = day.time.split(' ')[1]
+  }
+  return date.split(' ')[0].split('-').reverse().join('/') + ' ' + hour
+})
+
+// ---fonction pour connaitre la qualité de l'air à partir de l'index----
+const airQuality = (index) => {
+  if (index === 1) {
+    qualityAirValue.value = 'Bon'
+  } else if (index === 2) {
+    qualityAirValue.value = 'Modéré'
+  } else if (index === 3) {
+    qualityAirValue.value = 'Légèrement malsain'
+  } else if (index === 4) {
+    qualityAirValue.value = 'Malsain'
+  } else if (index === 5) {
+    qualityAirValue.value = 'Très malsain'
+  } else {
+    qualityAirValue.value = 'Dangereux'
+  }
+
+  return qualityAirValue.value
 }
 </script>
 
@@ -59,7 +106,7 @@ const indexDay = (index) => {
         :key="day"
       >
         <p>{{ currentWeather.forecast.forecastday.indexOf(day) }}</p>
-        <p>{{ day.date }}</p>
+        <p>{{ goodDate }}</p>
         <p>{{ day.day.condition.text }}</p>
         <img :src="day.day.condition.icon" alt="icon weather" />
         <div>
@@ -73,6 +120,7 @@ const indexDay = (index) => {
           <p>{{ day.day.totalprecip_mm }} mm</p>
           <p>{{ day.day.avghumidity }} %</p>
         </div>
+        <p>qualité air {{ airQuality(day.day.air_quality['us-epa-index']) }}</p>
       </div>
     </section>
 
@@ -80,16 +128,21 @@ const indexDay = (index) => {
       <div v-if="currentWeather && displayPerHour">
         <div
           class="per-hour"
+          :class="{ nightBackground: hour.is_day === 0, dayBackground: hour.is_day === 1 }"
           v-for="hour in currentWeather.forecast.forecastday[dayIndex].hour"
           :key="hour"
         >
-          <p>{{ hour.time }}</p>
+          <p>{{ goodDateHour }}</p>
           <p>{{ hour.condition.text }}</p>
           <img :src="hour.condition.icon" alt="icon weather" />
           <p>{{ hour.temp_c }} °C</p>
           <p>{{ hour.wind_kph }} km/h</p>
+          <p>rafale {{ hour.gust_kph }} km/h</p>
           <p>{{ hour.wind_dir }}</p>
-          <p>{{ hour.is_day }}</p>
+          <p>{{ hour.precip_mm }} mm</p>
+          <p>{{ hour.humidity }} %</p>
+          <p>qualité air {{ airQuality(hour.air_quality['gb-defra-index']) }}</p>
+          <!-- <p>{{ hour.is_day }}</p> -->
         </div>
       </div>
     </section>
@@ -132,5 +185,14 @@ main {
   border: 1px solid #000;
   padding: 10px;
   flex-shrink: 0;
+}
+
+.nightBackground {
+  background-color: #00008b;
+  color: white;
+}
+
+.dayBackground {
+  background-color: #fff8dc;
 }
 </style>

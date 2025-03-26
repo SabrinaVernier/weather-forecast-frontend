@@ -17,6 +17,7 @@ const cityInfos = ref('') // Stocke les infos de la ville
 const weatherCondition = ref('') // Stocke la météo actuelle
 const backgroundImage = ref('') // Stocke l'image de fond
 const backgroundDiv = ref('') // Stocke l'image de fond
+const qualityAirValue = ref('')
 
 // ✅ Fonction pour changer l'image de fond selon la météo
 const updateBackground = (condition) => {
@@ -181,6 +182,25 @@ const goodDate = computed(() => {
 
   return date.split(' ')[0].split('-').reverse().join('/') + ' ' + hour
 })
+
+// ---fonction pour connaitre la qualité de l'air à partir de l'index----
+const airQuality = (index) => {
+  if (index === 1) {
+    qualityAirValue.value = 'Bon'
+  } else if (index === 2) {
+    qualityAirValue.value = 'Modéré'
+  } else if (index === 3) {
+    qualityAirValue.value = 'Légèrement malsain'
+  } else if (index === 4) {
+    qualityAirValue.value = 'Malsain'
+  } else if (index === 5) {
+    qualityAirValue.value = 'Très malsain'
+  } else {
+    qualityAirValue.value = 'Dangereux'
+  }
+
+  return qualityAirValue.value
+}
 </script>
 
 <template>
@@ -272,7 +292,7 @@ const goodDate = computed(() => {
                 </p>
                 <p>
                   <font-awesome-icon :icon="['fas', 'star']" />
-                  {{ currentWeather.current.air_quality.usEpaIndex }}
+                  {{ airQuality(currentWeather.current.air_quality['gb-defra-index']) }}
                 </p>
               </div>
             </div>
