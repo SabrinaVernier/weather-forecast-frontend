@@ -6,15 +6,28 @@
 
 :root {
   --coral: coral;
+  --blue-light: rgb(68, 192, 233);
+  --green-light: #e6fdf5;
+  --green-api: #70b42c;
+  --green-back: #257a5d;
+  --green-dark: #083929;
 }
 
 body {
   font-family: 'Gill Sans', 'Gill Sans MT', sans-serif;
 }
 
+.container {
+  width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
 main {
   min-height: 100vh;
   margin-top: 100px;
+  padding-bottom: 50px;
+  /* padding: 20px; */
 }
 
 :is(h1, h2, h3) {
@@ -30,4 +43,9 @@ h1 {
 h2 {
   font-size: 24px;
   margin: 10px 0;
+  padding-bottom: 20px;
+}
+
+img {
+  display: block;
 }

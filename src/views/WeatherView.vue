@@ -1,7 +1,7 @@
 <script setup>
-import { RouterLink } from 'vue-router'
+// import { RouterLink } from 'vue-router'
 
-import { ref, computed } from 'vue'
+import { ref } from 'vue'
 
 import axios from 'axios'
 
@@ -11,6 +11,7 @@ const dayIndex = ref(null)
 const city = ref('Narbonne')
 const days = ref(3)
 const qualityAirValue = ref('')
+const backgroundColor = ref('')
 
 const prevWeather = async () => {
   const url = 'http://api.weatherapi.com/v1'
@@ -23,7 +24,6 @@ const prevWeather = async () => {
     )
     console.log('data>>>', data)
     currentWeather.value = data
-    // hourForecast.value = currentWeather.value.forecast.forecastday
   } catch (error) {
     console.log('error catch>>>', error)
   }
@@ -34,32 +34,43 @@ const indexDay = (index) => {
   dayIndex.value = index
 }
 
-// ---fonction pour avoir date au bon format--------
-const goodDate = computed(() => {
-  let date = ''
+// ✅ Fonction pour changer la couleur de fond selon la météo
+const updateBackground = (condition) => {
+  console.log('condition>>>', condition)
 
-  for (const day of currentWeather.value.forecast.forecastday) {
-    // console.log(day.date)
-    date = day.date
+  if (condition.toLowerCase().includes('pluie')) {
+    backgroundColor.value = 'rgb(154, 159, 162, 0.3)'
+  } else if (condition.toLowerCase().includes('neige')) {
+    backgroundColor.value = 'rgb(184, 200, 229, 0.3)'
+  } else if (condition.toLowerCase().includes('brume')) {
+    backgroundColor.value = 'rgb(165, 193, 233, 0.3)'
+  } else if (condition.toLowerCase().includes('orage')) {
+    backgroundColor.value = 'rgb(85, 72, 90, 0.3)'
+  } else if (
+    condition.toLowerCase().includes('nuageux') ||
+    condition.toLowerCase().includes('couvert')
+  ) {
+    backgroundColor.value = 'rgb(186, 187, 187, 0.3)'
+  } else if (condition.toLowerCase().includes('soleil')) {
+    backgroundColor.value = 'rgb(36, 106, 196, 0.3)'
+  } else {
+    backgroundColor.value = 'rgb(255, 255, 255)' // 🌞 Par défaut, ciel dégagé
   }
+}
+
+// ---fonction pour avoir date au bon format--------
+const goodDate = (date) => {
   return date.split(' ')[0].split('-').reverse().splice(0, 2).join('/')
-})
+}
 
 // ---fonction pour avoir date au bon format avec heure--------
-const goodDateHour = computed(() => {
-  let date = ''
-  let hour = ''
+const goodDateHour = (date) => {
+  return date.split(' ')[0].split('-').reverse().join('/')
+}
 
-  console.log(currentWeather.value.forecast.forecastday[dayIndex.value].hour)
-  console.log(dayIndex.value)
-
-  for (const day of currentWeather.value.forecast.forecastday[dayIndex.value].hour) {
-    // console.log(day.time)
-    date = day.time
-    hour = day.time.split(' ')[1]
-  }
-  return date.split(' ')[0].split('-').reverse().join('/') + ' ' + hour
-})
+const justHour = (hour) => {
+  return hour.split(' ')[1]
+}
 
 // ---fonction pour connaitre la qualité de l'air à partir de l'index----
 const airQuality = (index) => {
@@ -92,78 +103,112 @@ const whatDay = (date) => {
 
 <template>
   <main>
-    <section class="home">
-      <RouterLink :to="{ name: 'home' }">go to Home Page</RouterLink>
-    </section>
+    <div class="container">
+      <h1>Prévisions</h1>
 
-    <section class="search">
-      <h1>Quel temps fera-t'il ?</h1>
-      <form @submit.prevent="prevWeather">
-        <label>Ville : <input type="text" v-model="city" name="city" placeholder="Paris" /></label>
-        <label
-          >Combien de jours : <input type="number" v-model="days" name="days" placeholder="3"
-        /></label>
-        <button>Rechercher</button>
-      </form>
-    </section>
+      <section class="search">
+        <h2 class="text-slide">Quel temps fera-t'il ?</h2>
+        <form @submit.prevent="prevWeather">
+          <label
+            >Ville :
+            <input
+              type="text"
+              v-model="city"
+              name="city"
+              placeholder="Paris"
+              @input="currentWeather = null"
+          /></label>
+          <label
+            >Combien de jours :
+            <input
+              type="number"
+              v-model="days"
+              name="days"
+              placeholder="3"
+              @input="currentWeather = null"
+          /></label>
+          <button>Rechercher</button>
+        </form>
+      </section>
 
-    <section v-if="currentWeather" class="forecast">
-      <div
-        class="per day"
-        @click="indexDay(currentWeather.forecast.forecastday.indexOf(day))"
-        v-for="day in currentWeather.forecast.forecastday"
-        :key="day"
-      >
-        <!-- <p>{{ currentWeather.forecast.forecastday.indexOf(day) }}</p> -->
-        <p>{{ whatDay(day.date) }}</p>
-        <p>{{ goodDate }}</p>
-        <p>{{ day.day.condition.text }}</p>
-        <img :src="day.day.condition.icon" alt="icon weather" />
-        <div>
-          <p>{{ day.day.maxtemp_c }} °C /</p>
-          <p>{{ day.day.mintemp_c }} °C</p>
-        </div>
-        <div>
-          <p>{{ day.day.maxwind_kph }} km/h</p>
-        </div>
-        <div>
-          <p>{{ day.day.totalprecip_mm }} mm</p>
-          <p>{{ day.day.avghumidity }} %</p>
-        </div>
-        <p>qualité air {{ airQuality(day.day.air_quality['us-epa-index']) }}</p>
-      </div>
-    </section>
-
-    <section class="result">
-      <div v-if="currentWeather && displayPerHour">
+      <section v-if="currentWeather" class="forecast">
         <div
-          class="per-hour"
-          :class="{ nightBackground: hour.is_day === 0, dayBackground: hour.is_day === 1 }"
-          v-for="hour in currentWeather.forecast.forecastday[dayIndex].hour"
-          :key="hour"
+          class="per-day"
+          @click="indexDay(currentWeather.forecast.forecastday.indexOf(day))"
+          v-for="day in currentWeather.forecast.forecastday"
+          :key="day"
+          :style="{ backgroundColor: updateBackground(day.day.condition.text) }"
         >
-          <p>{{ goodDateHour }}</p>
-          <p>{{ hour.condition.text }}</p>
-          <img :src="hour.condition.icon" alt="icon weather" />
-          <p>{{ hour.temp_c }} °C</p>
-          <p>{{ hour.wind_kph }} km/h</p>
-          <p>rafale {{ hour.gust_kph }} km/h</p>
-          <p>{{ hour.wind_dir }}</p>
-          <p>{{ hour.precip_mm }} mm</p>
-          <p>{{ hour.humidity }} %</p>
-          <p>qualité air {{ airQuality(hour.air_quality['gb-defra-index']) }}</p>
-          <!-- <p>{{ hour.is_day }}</p> -->
+          <!-- <p>{{ currentWeather.forecast.forecastday.indexOf(day) }}</p> -->
+          <p class="text-align p1">{{ whatDay(day.date) }}</p>
+          <p class="text-align p2">{{ goodDate(day.date) }}</p>
+          <p class="text-align p3">{{ day.day.condition.text }}</p>
+          <img :src="day.day.condition.icon" alt="icon weather" />
+          <div>
+            <p>
+              <font-awesome-icon :icon="['fas', 'thermometer-three-quarters']" />{{
+                day.day.maxtemp_c
+              }}
+              °C
+            </p>
+            <p>
+              <font-awesome-icon :icon="['fas', 'thermometer-quarter']" />{{ day.day.mintemp_c }} °C
+            </p>
+          </div>
+          <div>
+            <p><font-awesome-icon :icon="['fas', 'wind']" />{{ day.day.maxwind_kph }} km/h</p>
+          </div>
+          <div>
+            <p>
+              <font-awesome-icon :icon="['fas', 'cloud-rain']" />{{ day.day.totalprecip_mm }} mm
+            </p>
+            <p><font-awesome-icon :icon="['fas', 'tint']" />{{ day.day.avghumidity }} %</p>
+          </div>
+          <div>
+            <p>
+              <font-awesome-icon :icon="['fas', 'star']" /> air
+              {{ airQuality(day.day.air_quality['us-epa-index']) }}
+            </p>
+          </div>
         </div>
-      </div>
-    </section>
+      </section>
+
+      <section class="result">
+        <div v-if="currentWeather && displayPerHour">
+          <div
+            class="per-hour"
+            :class="{ nightBackground: hour.is_day === 0, dayBackground: hour.is_day === 1 }"
+            v-for="hour in currentWeather.forecast.forecastday[dayIndex].hour"
+            :key="hour"
+          >
+            <p>{{ goodDateHour(hour.time) }}</p>
+            <p>{{ justHour(hour.time) }}</p>
+            <p>{{ hour.condition.text }}</p>
+            <img :src="hour.condition.icon" alt="icon weather" />
+            <p>{{ hour.temp_c }} °C</p>
+            <p>{{ hour.wind_kph }} km/h</p>
+            <p>rafale {{ hour.gust_kph }} km/h</p>
+            <p>{{ hour.wind_dir }}</p>
+            <p>{{ hour.precip_mm }} mm</p>
+            <p>{{ hour.humidity }} %</p>
+            <p>qualité air {{ airQuality(hour.air_quality['gb-defra-index']) }}</p>
+            <!-- <p>{{ hour.is_day }}</p> -->
+          </div>
+        </div>
+      </section>
+    </div>
   </main>
 </template>
 <style scoped>
 main {
-  padding: 100px;
+  background-image: url('../assets/Imgs/N-nature-verte6.jpg');
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+.container {
   display: flex;
   flex-direction: column;
-  gap: 50px;
+  gap: 30px;
 }
 
 /* ---forecast--- */
@@ -173,17 +218,38 @@ main {
 }
 .forecast > div {
   border: 1px solid darkseagreen;
+  background-color: var(--blue-light);
+  border-radius: 20px;
   padding: 20px;
 }
 
 /* --per-day */
-
+.per-day img {
+  padding: 20px 0;
+}
+.per-day svg {
+  font-size: 12px;
+  margin-right: 10px;
+  color: white;
+}
+.per-day > div {
+  color: white;
+  font-size: 14px;
+  margin-bottom: 5px;
+}
+.text-align {
+  text-align: center;
+}
+.p1 {
+  margin-bottom: 10px;
+  font-size: 20px;
+}
 /* ---per-hour */
 
 .result {
   height: 200px;
   margin-top: 100px;
-  border: 5px solid plum;
+  /* border: 5px solid plum; */
 }
 
 .result > div {
@@ -204,5 +270,27 @@ main {
 
 .dayBackground {
   background-color: #fff8dc;
+}
+
+/* ---animation---------------- */
+@keyframes slideInOut {
+  0% {
+    transform: translateX(-50px);
+    opacity: 0;
+  }
+  50% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(50px);
+    opacity: 0;
+  }
+}
+
+.text-slide {
+  font-size: 24px;
+  font-weight: bold;
+  animation: slideInOut 3s infinite;
 }
 </style>

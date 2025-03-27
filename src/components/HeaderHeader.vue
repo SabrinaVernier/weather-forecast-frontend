@@ -4,7 +4,7 @@
 
 <template>
   <header>
-    <div>
+    <div class="container">
       <RouterLink :to="{ name: 'home' }">Météo du jour</RouterLink>
       <RouterLink :to="{ name: 'weather' }">Prévisions</RouterLink>
     </div>
@@ -14,15 +14,15 @@
 header {
   height: 100px;
   width: 100vw;
-  background-color: lightcoral;
+  background-color: var(--green-back);
   position: fixed;
   top: 0;
-  z-index: 1;
+  z-index: 10;
 }
 
 header > div {
   display: flex;
-  gap: 20px;
+  gap: 100px;
   justify-content: center;
   align-items: center;
   height: 100%;
@@ -35,5 +35,13 @@ header > div a {
   font-weight: bold;
   text-decoration: none;
   text-transform: uppercase;
+}
+
+.container {
+  background-color: var(--green-back);
+}
+
+.router-link-exact-active {
+  color: yellow;
 }
 </style>

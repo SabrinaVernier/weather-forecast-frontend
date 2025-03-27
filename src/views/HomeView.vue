@@ -17,8 +17,11 @@ const cityInfos = ref('') // Stocke les infos de la ville
 const latLong = ref('')
 const weatherCondition = ref('') // Stocke la météo actuelle
 const backgroundImage = ref('') // Stocke l'image de fond
-const backgroundDiv = ref('') // Stocke l'image de fond
+const backgroundDiv = ref('') // Stocke la couleur de fond
 const qualityAirValue = ref('')
+// const cityImage = ref(null)
+const urlImage = ref('')
+const urlArrayImage = ref([])
 
 // ✅ Fonction pour changer l'image de fond selon la météo
 const updateBackground = (condition) => {
@@ -101,6 +104,7 @@ onMounted(async () => {
 
 // fonction déclenchée par le formulaire-------------------------------------
 const prevWeather = async () => {
+  urlArrayImage.value = []
   currentWeather.value = null
 
   const url = 'http://api.weatherapi.com/v1'
@@ -161,6 +165,7 @@ const onMapClick = async (e) => {
 
   try {
     currentWeather.value = null
+    urlArrayImage.value = []
 
     const url = 'http://api.weatherapi.com/v1'
 
@@ -174,6 +179,7 @@ const onMapClick = async (e) => {
 
     const data = response.data
     currentWeather.value = data
+    city.value = data.location.name
     // const { lat, lon } = data.location
     const weatherIcon = 'https:' + data.current.condition.icon
 
@@ -202,6 +208,12 @@ const goodDate = computed(() => {
   return date.split(' ')[0].split('-').reverse().join('/') + ' ' + hour
 })
 
+const updateDate = computed(() => {
+  const date = currentWeather.value.current.last_updated
+  const hour = date.split(' ')[1]
+  return date.split(' ')[0].split('-').reverse().join('/') + ' ' + hour
+})
+
 // ---fonction pour connaitre la qualité de l'air à partir de l'index----
 const airQuality = (index) => {
   if (index === 1) {
@@ -220,144 +232,195 @@ const airQuality = (index) => {
 
   return qualityAirValue.value
 }
+
+// ---fonction pour obtenir les noms d'images de la ville------
+const getCityImage = async () => {
+  try {
+    const accessKey = 'TUeT7BZVWBAdhFowpcRlOYJICqIDDiZ35j_KDaFRnok' // Remplace par ta clé API
+
+    const { data } = await axios.get(
+      `https://api.unsplash.com/search/photos?query=${city.value}&client_id=${accessKey}&per_page=10&orientation=landscape`,
+    )
+
+    console.log('data getcityimage>>>', data)
+    if (data.results.length === 1) {
+      urlImage.value = data.results[0].urls.regular
+    } else if (data.results.length > 1) {
+      urlArrayImage.value = data.results
+      console.log('arrayUrl>>>', urlArrayImage.value)
+    } else {
+      console.log('aucune image trouvée')
+    }
+  } catch (error) {
+    console.log('error catch infoCity>>>', error)
+  }
+}
 </script>
 
 <template>
   <main>
-    <div class="top-div">
+    <div class="container">
       <h1>Météo du jour</h1>
+      <div class="top-div">
+        <div class="search">
+          <h2 class="text-animation text-slide">=> Quel temps fait-il aujourd'hui ?</h2>
+          <section class="search-by-city">
+            <p>Recherche par ville :</p>
+            <form @submit.prevent="prevWeather">
+              <label>
+                <input
+                  type="text"
+                  v-model="city"
+                  name="city"
+                  placeholder="Paris"
+                  @click="errorMessage = ''"
+              /></label>
+              <button>Rechercher</button>
+            </form>
+          </section>
 
-      <h2>Quel temps fait-il aujourd'hui ?</h2>
+          <section class="search-by-map">
+            <p>Recherche sur la carte :</p>
+            <div id="map"></div>
+          </section>
 
-      <div class="search">
-        <section class="search-by-city">
-          <p>recherche par ville :</p>
-          <form @submit.prevent="prevWeather">
-            <label>
-              <input
-                type="text"
-                v-model="city"
-                name="city"
-                placeholder="Paris"
-                @click="errorMessage = ''"
-            /></label>
-            <button>Rechercher</button>
-          </form>
-        </section>
+          <section class="search-images">
+            <div>
+              <button v-if="city" @click="getCityImage()">
+                Images de la ville et les alentours
+              </button>
+            </div>
+          </section>
+        </div>
+        <section class="section-weather">
+          <p class="error-message" v-if="errorMessage">{{ errorMessage }}</p>
 
-        <section class="search-by-map">
-          <p>Recherche sur la carte :</p>
-          <div id="map"></div>
-        </section>
-      </div>
-    </div>
+          <div v-else class="result">
+            <div
+              v-if="currentWeather"
+              class="weather-container"
+              :style="{ backgroundImage: backgroundImage }"
+            >
+              <div class="div-absolute" :style="{ backgroundColor: backgroundDiv }">
+                <div class="first-div">
+                  <h2>
+                    <font-awesome-icon :icon="['fas', 'map-marker-alt']" />
+                    <strong>{{ cityInfos.name }}</strong
+                    >, <span>{{ cityInfos.region }}</span
+                    >, {{ cityInfos.country }}
+                  </h2>
+                  <p><font-awesome-icon :icon="['far', 'calendar']" /> {{ goodDate }}</p>
+                </div>
 
-    <div class="bottom-div">
-      <section class="section-weather">
-        <p class="error-message" v-if="errorMessage">{{ errorMessage }}</p>
+                <div class="second-div">
+                  <div class="temp">
+                    <img :src="currentWeather.current.condition.icon" alt="icon weather" />
+                    <h1 v-if="currentWeather.current.temp_c >= 15">
+                      <font-awesome-icon :icon="['fas', 'thermometer-three-quarters']" />
+                      <strong>{{ currentWeather.current.temp_c }}</strong> °C
+                    </h1>
+                    <h1 v-else-if="currentWeather.current.temp_c >= 5">
+                      <font-awesome-icon :icon="['fas', 'thermometer-half']" />
+                      <strong>{{ currentWeather.current.temp_c }}</strong> °C
+                    </h1>
+                    <h1 v-else>
+                      <font-awesome-icon :icon="['fas', 'thermometer-quarter']" />
+                      <strong>{{ currentWeather.current.temp_c }}</strong> °C
+                    </h1>
+                  </div>
+                  <p>
+                    <em>{{ currentWeather.current.condition.text }}</em>
+                  </p>
+                  <p>
+                    <font-awesome-icon :icon="['fas', 'thermometer-quarter']" /> ressenti
+                    {{ currentWeather.current.windchill_c }} °C
+                  </p>
+                  <p>
+                    <font-awesome-icon :icon="['fas', 'sun']" /> indice uv :
+                    {{ currentWeather.current.uv }}
+                  </p>
+                </div>
 
-        <div v-else class="result">
-          <div
-            v-if="currentWeather"
-            class="weather-container"
-            :style="{ backgroundImage: backgroundImage }"
-          >
-            <div class="div-absolute" :style="{ backgroundColor: backgroundDiv }">
-              <div class="first-div">
-                <h2>
-                  <font-awesome-icon :icon="['fas', 'map-marker-alt']" />
-                  <strong>{{ cityInfos.name }}</strong
-                  >, <span>{{ cityInfos.region }}</span
-                  >, {{ cityInfos.country }}
-                </h2>
-                <p><font-awesome-icon :icon="['far', 'calendar']" /> {{ goodDate }}</p>
-                <div>
-                  <img :src="currentWeather.current.condition.icon" alt="icon weather" />
-                  <p>{{ currentWeather.current.condition.text }}</p>
+                <div class="third-div">
+                  <p>
+                    <font-awesome-icon :icon="['fas', 'cloud']" />
+                    {{ currentWeather.current.cloud }} %
+                  </p>
+                  <p>
+                    <font-awesome-icon :icon="['fas', 'tint']" />
+                    {{ currentWeather.current.humidity }} mm
+                  </p>
+                  <p>
+                    <font-awesome-icon :icon="['fas', 'cloud-rain']" />
+                    {{ currentWeather.current.precip_mm }} mm
+                  </p>
+                  <p>
+                    <font-awesome-icon :icon="['fas', 'wind']" />
+                    {{ currentWeather.current.wind_kph }} km/h
+                  </p>
+                  <p style="scale: 80%">(max : {{ currentWeather.current.gust_kph }} Km/h)</p>
+                  <p>
+                    <font-awesome-icon :icon="['fas', 'location-arrow']" />
+                    {{ currentWeather.current.wind_dir }}
+                  </p>
+                  <p>
+                    <font-awesome-icon :icon="['fas', 'star']" />
+                    {{ airQuality(currentWeather.current.air_quality['gb-defra-index']) }}
+                  </p>
                 </div>
               </div>
 
-              <div class="second-div">
-                <h1 v-if="currentWeather.current.temp_c >= 15">
-                  <font-awesome-icon :icon="['fas', 'thermometer-three-quarters']" />
-                  <strong>{{ currentWeather.current.temp_c }}</strong> °C
-                </h1>
-                <h1 v-else-if="currentWeather.current.temp_c >= 5">
-                  <font-awesome-icon :icon="['fas', 'thermometer-half']" />
-                  <strong>{{ currentWeather.current.temp_c }}</strong> °C
-                </h1>
-                <h1 v-else>
-                  <font-awesome-icon :icon="['fas', 'thermometer-quarter']" />
-                  <strong>{{ currentWeather.current.temp_c }}</strong> °C
-                </h1>
-                <p>
-                  <font-awesome-icon :icon="['fas', 'thermometer-quarter']" /> ressenti
-                  {{ currentWeather.current.windchill_c }} °C
-                </p>
-                <p>
-                  <font-awesome-icon :icon="['fas', 'sun']" /> indice uv :
-                  {{ currentWeather.current.uv }}
-                </p>
+              <div class="fourth-div">
+                <p>Dernière mise à jour : {{ updateDate }}</p>
               </div>
-
-              <div class="third-div">
-                <p>
-                  <font-awesome-icon :icon="['fas', 'cloud']" />
-                  {{ currentWeather.current.cloud }} %
-                </p>
-                <p>
-                  <font-awesome-icon :icon="['fas', 'tint']" />
-                  {{ currentWeather.current.humidity }} mm
-                </p>
-                <p>
-                  <font-awesome-icon :icon="['fas', 'cloud-rain']" />
-                  {{ currentWeather.current.precip_mm }} mm
-                </p>
-                <p>
-                  <font-awesome-icon :icon="['fas', 'wind']" />
-                  {{ currentWeather.current.wind_kph }} km/h
-                </p>
-                <p style="scale: 80%">(max : {{ currentWeather.current.gust_kph }} Km/h)</p>
-                <p>
-                  <font-awesome-icon :icon="['fas', 'location-arrow']" />
-                  {{ currentWeather.current.wind_dir }}
-                </p>
-                <p>
-                  <font-awesome-icon :icon="['fas', 'star']" />
-                  {{ airQuality(currentWeather.current.air_quality['gb-defra-index']) }}
-                </p>
-              </div>
-            </div>
-
-            <div class="fourth-div">
-              <p>Dernière mise à jour : {{ currentWeather.current.last_updated }}</p>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
+      </div>
 
-      <section class="section-city"></section>
+      <div class="bottom-div">
+        <section class="section-city" v-if="city">
+          <div v-if="urlImage && !urlArrayImage" id="image-container">
+            <img :src="urlImage" alt="image de la ville" />
+          </div>
+          <div v-else-if="!urlImage && urlArrayImage" id="image-container">
+            <div v-for="url in urlArrayImage" :key="url">
+              <img :src="url.urls.regular" alt="images de la ville" />
+            </div>
+          </div>
+
+          <div v-else><p>Aucune image n'a été trouvée !</p></div>
+        </section>
+      </div>
     </div>
   </main>
 </template>
 <style scoped>
 main {
-  background-color: black;
-  padding: 20px 50px;
-  display: flex;
-  flex-direction: column;
-  gap: 50px;
-  /* min-height: 100vh; */
+  background-image: url('../assets/Imgs/N-nature-verte4.jpg');
+  background-repeat: no-repeat;
+  background-size: cover;
+  /* padding: 20px 50px; */
 }
 
-main > div {
+.container {
+  background-color: var(--green-light);
+  border: 10px groove var(--green-dark);
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+main > div > div {
   background-color: #fff;
+  padding: 10px;
+  border: 1px solid red;
 }
 
 section {
   flex: 1;
   padding: 20px;
-  /* border: 1px solid #000; */
 }
 p {
   margin: 5px 0;
@@ -365,10 +428,18 @@ p {
 strong {
   font-weight: bold;
 }
-/* ---search---------- */
+em {
+  font-style: italic;
+}
 
+/* ---TOP-DIV------------------- */
+/* ---search---------- */
+.top-div {
+  display: flex;
+}
 .search {
   display: flex;
+  flex-direction: column;
   height: fit-content;
 }
 
@@ -376,31 +447,38 @@ strong {
   flex: 1;
 }
 .search-by-map {
-  flex: 2;
+  flex: 1;
 }
 /* ----map------------ */
 #map {
   width: 400px;
-  height: 300px;
+  height: 450px;
   border-radius: 10px;
-  margin-left: 200px;
+  margin: 10px auto;
+  z-index: 1;
   /* scale: 50%; */
 }
 
 /* -----response-------- */
-.result {
-  height: 600px;
-  /* border: 5px solid plum; */
+.bottom-div {
+  width: 100%;
 }
 
 .weather-container {
   width: 100%;
   height: 100%;
+  border-radius: 20px;
   background-size: cover;
   background-position: center;
   transition: background 0.5s ease-in-out;
   display: flex;
   position: relative;
+  /* scale: 80%; */
+}
+.result {
+  height: 600px;
+  width: 100%;
+  /* border: 5px solid plum; */
 }
 
 /* ---div-absolute-------- */
@@ -435,19 +513,68 @@ strong {
 .first-div span {
   text-transform: uppercase;
 }
+.second-div .temp {
+  display: flex;
+}
+.second-div .temp img {
+  object-fit: cover;
+}
 .fourth-div {
   color: white;
   position: absolute;
-  bottom: 0;
-  right: 0;
+  bottom: 10px;
+  right: 10px;
 }
+
+/* ---BOTTOM-DIV---------------- */
+/* ---section city --------- */
+.section-city {
+  background-color: black;
+}
+#image-container {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  border: 1px solid #000;
+}
+#image-container > div {
+  flex-shrink: 0;
+  width: calc((100% - 40px) / 5);
+}
+#image-container img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 15px;
+  box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.2);
+  transition: transform 0.3s ease-in-out;
+}
+
+#image-container img:hover {
+  transform: scale(1.05);
+}
+
 /* ---errorMessage */
 .error-message {
   color: red;
   margin-top: 50px;
 }
 
-.div-absolute > div {
-  border: 1px solid #000;
+/* ---animation------------- */
+@keyframes fadeInOut {
+  0% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+.text-animation {
+  font-size: 24px;
+  font-weight: bold;
+  animation: fadeInOut 3s infinite; /* Animation infinie */
 }
 </style>
