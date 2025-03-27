@@ -14,7 +14,7 @@ const qualityAirValue = ref('')
 const backgroundColor = ref('')
 
 const prevWeather = async () => {
-  const url = 'http://api.weatherapi.com/v1'
+  const url = 'https://api.weatherapi.com/v1'
 
   const key = 'da3c0767563b48ddb4f160425252003'
 

@@ -65,7 +65,7 @@ onMounted(async () => {
     const key = 'da3c0767563b48ddb4f160425252003'
     // 🔥 Récupération des coordonnées et icônes météo
     const response = await fetch(
-      `http://api.weatherapi.com/v1/current.json?key=${key}&q=Narbonne&aqi=yes&lang=fr&alerts=yes`,
+      `https://api.weatherapi.com/v1/current.json?key=${key}&q=Narbonne&aqi=yes&lang=fr&alerts=yes`,
     )
     const data = await response.json()
 
@@ -108,7 +108,7 @@ const prevWeather = async () => {
   urlArrayImage.value = []
   currentWeather.value = null
 
-  const url = 'http://api.weatherapi.com/v1'
+  const url = 'https://api.weatherapi.com/v1'
 
   const key = 'da3c0767563b48ddb4f160425252003'
 
@@ -168,7 +168,7 @@ const onMapClick = async (e) => {
     currentWeather.value = null
     urlArrayImage.value = []
 
-    const url = 'http://api.weatherapi.com/v1'
+    const url = 'https://api.weatherapi.com/v1'
 
     const key = 'da3c0767563b48ddb4f160425252003'
     // 🔥 Récupération des coordonnées et icônes météo
