@@ -12,6 +12,7 @@ const currentWeather = ref(null)
 const currentMarker = ref(null)
 const city = ref('')
 const errorMessage = ref('')
+const errorImage = ref('')
 
 const cityInfos = ref('') // Stocke les infos de la ville
 const latLong = ref('')
@@ -21,7 +22,7 @@ const backgroundDiv = ref('') // Stocke la couleur de fond
 const qualityAirValue = ref('')
 // const cityImage = ref(null)
 const urlImage = ref('')
-const urlArrayImage = ref([])
+const urlArrayImage = ref(null)
 
 // ✅ Fonction pour changer l'image de fond selon la météo
 const updateBackground = (condition) => {
@@ -239,17 +240,21 @@ const getCityImage = async () => {
     const accessKey = 'TUeT7BZVWBAdhFowpcRlOYJICqIDDiZ35j_KDaFRnok' // Remplace par ta clé API
 
     const { data } = await axios.get(
-      `https://api.unsplash.com/search/photos?query=${city.value}&client_id=${accessKey}&per_page=10&orientation=landscape`,
+      `https://api.unsplash.com/search/photos?query=${city.value}&client_id=${accessKey}&per_page=20&orientation=landscape`,
     )
 
     console.log('data getcityimage>>>', data)
-    if (data.results.length === 1) {
+    if (data.results.length === 0) {
+      console.log('aucune image trouvée')
+      errorImage.value = 'Aucune image trouvée'
+    } else if (data.results.length === 1) {
       urlImage.value = data.results[0].urls.regular
     } else if (data.results.length > 1) {
       urlArrayImage.value = data.results
       console.log('arrayUrl>>>', urlArrayImage.value)
     } else {
-      console.log('aucune image trouvée')
+      console.log('Un problème est survenu, veuillez réessayer...')
+      errorImage.value = 'Un problème est survenu, veuillez réessayer...'
     }
   } catch (error) {
     console.log('error catch infoCity>>>', error)
@@ -389,7 +394,7 @@ const getCityImage = async () => {
             </div>
           </div>
 
-          <div v-else><p>Aucune image n'a été trouvée !</p></div>
+          <p class="error-image" v-if="errorImage">{{ errorImage }}</p>
         </section>
       </div>
     </div>
@@ -415,7 +420,7 @@ main {
 main > div > div {
   background-color: #fff;
   padding: 10px;
-  border: 1px solid red;
+  /* border: 1px solid red; */
 }
 
 section {
@@ -434,6 +439,11 @@ em {
 
 /* ---TOP-DIV------------------- */
 /* ---search---------- */
+form input {
+  border-radius: 5px;
+  padding: 5px;
+  height: 30px;
+}
 .top-div {
   display: flex;
 }
@@ -448,6 +458,24 @@ em {
 }
 .search-by-map {
   flex: 1;
+}
+/* ---searc-img--- */
+.search-images button,
+form button {
+  background: linear-gradient(
+    10deg,
+    var(--green-light),
+    var(--green-api),
+    var(--green-back),
+    var(--green-dark)
+  );
+  color: white;
+  font-size: 18px;
+  font-weight: bold;
+  padding: 10px 15px;
+  margin-left: 30px;
+  border-radius: 10px;
+  border: none;
 }
 /* ----map------------ */
 #map {
@@ -468,6 +496,7 @@ em {
   width: 100%;
   height: 100%;
   border-radius: 20px;
+  margin-top: 50px;
   background-size: cover;
   background-position: center;
   transition: background 0.5s ease-in-out;
@@ -530,12 +559,14 @@ em {
 /* ---section city --------- */
 .section-city {
   background-color: black;
+  border-radius: 10px;
 }
 #image-container {
   display: flex;
   gap: 10px;
   flex-wrap: wrap;
-  border: 1px solid #000;
+  box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.2);
+  /* border: 1px solid #000; */
 }
 #image-container > div {
   flex-shrink: 0;
@@ -557,6 +588,11 @@ em {
 .error-message {
   color: red;
   margin-top: 50px;
+}
+
+.error-image {
+  color: white;
+  font-size: 20px;
 }
 
 /* ---animation------------- */

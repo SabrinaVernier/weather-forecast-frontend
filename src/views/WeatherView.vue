@@ -36,8 +36,6 @@ const indexDay = (index) => {
 
 // ✅ Fonction pour changer la couleur de fond selon la météo
 const updateBackground = (condition) => {
-  console.log('condition>>>', condition)
-
   if (condition.toLowerCase().includes('pluie')) {
     backgroundColor.value = 'rgb(154, 159, 162, 0.3)'
   } else if (condition.toLowerCase().includes('neige')) {
@@ -107,7 +105,7 @@ const whatDay = (date) => {
       <h1>Prévisions</h1>
 
       <section class="search">
-        <h2 class="text-slide">Quel temps fera-t'il ?</h2>
+        <h2 class="text-slide">=> Quel temps fera-t'il ?</h2>
         <form @submit.prevent="prevWeather">
           <label
             >Ville :
@@ -127,10 +125,11 @@ const whatDay = (date) => {
               placeholder="3"
               @input="currentWeather = null"
           /></label>
-          <button>Rechercher</button>
+          <button>Prévisions</button>
         </form>
       </section>
 
+      <h3>Prévisions par jour</h3>
       <section v-if="currentWeather" class="forecast">
         <div
           class="per-day"
@@ -174,6 +173,7 @@ const whatDay = (date) => {
       </section>
 
       <section class="result">
+        <h3>Prévisions (par heure) du jour choisi</h3>
         <div v-if="currentWeather && displayPerHour">
           <div
             class="per-hour"
@@ -211,6 +211,31 @@ main {
   gap: 30px;
 }
 
+/* ---form------- */
+form label {
+  margin-right: 20px;
+}
+form input {
+  border-radius: 5px;
+  padding: 5px;
+  height: 30px;
+}
+form button {
+  background: linear-gradient(
+    10deg,
+    var(--green-light),
+    var(--green-api),
+    var(--green-back),
+    var(--green-dark)
+  );
+  color: white;
+  font-size: 18px;
+  font-weight: bold;
+  padding: 10px 15px;
+  margin-left: 30px;
+  border-radius: 10px;
+  border: none;
+}
 /* ---forecast--- */
 .forecast {
   display: flex;
@@ -248,17 +273,19 @@ main {
 
 .result {
   height: 200px;
-  margin-top: 100px;
+  margin: 50px 0;
   /* border: 5px solid plum; */
 }
 
 .result > div {
   display: flex;
+  gap: 5px;
   overflow: scroll;
 }
 
 .result > div > div {
   border: 1px solid #000;
+  border-radius: 10px;
   padding: 10px;
   flex-shrink: 0;
 }
