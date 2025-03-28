@@ -8,29 +8,64 @@ import axios from 'axios'
 const currentWeather = ref(null)
 const displayPerHour = ref(false)
 const dayIndex = ref(null)
-const city = ref('Narbonne')
-const days = ref(3)
+const city = ref('')
+const zipCode = ref('')
+const days = ref(null)
+const errorMessage = ref('')
 const cityInfos = ref('') // Stocke les infos de la ville
 const qualityAirValue = ref('')
 const backgroundColor = ref('')
 
 const prevWeather = async () => {
+  errorMessage.value = ''
   const url = 'https://api.weatherapi.com/v1'
 
   const key = 'da3c0767563b48ddb4f160425252003'
 
-  try {
-    const { data } = await axios.get(
-      `${url}/forecast.json?key=${key}&q=${city.value}&lang=fr&aqi=yes&days=${days.value}`,
-    )
-    console.log('data>>>', data)
-    currentWeather.value = data
-    cityInfos.value = data.location
-  } catch (error) {
-    console.log('error catch>>>', error)
+  if (!days.value && (city.value || zipCode.value)) {
+    errorMessage.value = 'Veuillez renseigner le nombre de jour !'
+  } else if (days.value && city.value && !zipCode.value) {
+    try {
+      if (city.value.slice(city.value.length - 3, city.value.length) !== ',FR') {
+        city.value = `${city.value},FR`
+      }
+
+      const { data } = await axios.get(
+        `${url}/forecast.json?key=${key}&q=${city.value}&lang=fr&aqi=yes&days=${days.value}`,
+      )
+      console.log('data>>>', data)
+      currentWeather.value = data
+      cityInfos.value = data.location
+    } catch (error) {
+      console.log('error catch>>>', error)
+    }
+  } else if (days.value && !city.value && zipCode.value) {
+    const geoApiKey = '24cecf305a964996b3f969c6da16bb03'
+    zipCode.value = `${zipCode.value}, France`
+
+    try {
+      const { data } = await axios.get(
+        `https://api.opencagedata.com/geocode/v1/json?q=${zipCode.value}&key=${geoApiKey}`,
+      )
+
+      console.log('data zip >>>', data)
+      const cityZip = data.results[0].components.city
+      console.log('cityzip>>>', cityZip)
+
+      zipCode.value = ''
+      city.value = cityZip
+      prevWeather()
+    } catch (error) {
+      console.log('error catch zipcode>>>', error)
+    }
+  } else if (!zipCode.value && !city.value) {
+    errorMessage.value = 'Veuillez remplir un des champs "Ville" ou "Code Postal"!'
+  } else {
+    errorMessage.value = 'Veuillez entrer un nom OU un code postal'
   }
 }
 
+// ---fonction pour connaître l'index du jour ----
 const indexDay = (index) => {
   displayPerHour.value = true
   dayIndex.value = index
@@ -104,20 +139,34 @@ const whatDay = (date) => {
 <template>
   <main>
     <div class="container">
-      <h1>Prévisions</h1>
+      <h1>Prévisions <br /><em>(jusqu'à 14 jours)</em></h1>
 
       <section class="search">
         <h2 class="text-slide">=> Quel temps fera-t'il ?</h2>
         <form @submit.prevent="prevWeather">
-          <label
-            >Ville :
-            <input
-              type="text"
-              v-model="city"
-              name="city"
-              placeholder="Paris"
-              @input="currentWeather = null"
-          /></label>
+          <div>
+            <label
+              >Ville :
+              <input
+                type="text"
+                v-model="city"
+                name="city"
+                placeholder="Paris"
+                @input="currentWeather = null"
+                @click="((errorMessage = ''), (zipCode = ''))"
+            /></label>
+            <p class="ou">OU</p>
+            <label
+              >Code Postal :
+              <input
+                type="text"
+                v-model="zipCode"
+                name="zipCode"
+                placeholder="11100"
+                @input="currentWeather = null"
+                @click="((errorMessage = ''), (city = ''))"
+            /></label>
+          </div>
           <label
             >Combien de jours :
             <input
@@ -125,13 +174,17 @@ const whatDay = (date) => {
               v-model="days"
               name="days"
               placeholder="3"
+              max="14"
+              min="1"
               @input="currentWeather = null"
           /></label>
           <button>Prévisions</button>
         </form>
+
+        <p class="error-message">{{ errorMessage }}</p>
       </section>
 
-      <h3>
+      <h3 v-if="cityInfos">
         Prévisions pour <strong>{{ cityInfos.name }}</strong
         >, <span class="span-uppercase">{{ cityInfos.region }}</span
         >,
@@ -220,8 +273,30 @@ main {
 h3 {
   color: var(--green-back);
 }
+em {
+  font-style: italic;
+  font-size: 20px;
+  color: var(--green-api);
+}
 
 /* ---form------- */
+form {
+  display: flex;
+  align-items: center;
+}
+form > div {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+}
+form .ou {
+  font-style: italic;
+  font-weight: bold;
+  font-size: 20px;
+  color: var(--green-back);
+  align-self: center;
+}
 form label {
   margin-right: 20px;
 }
@@ -249,10 +324,12 @@ form button {
 /* ---forecast--- */
 .forecast {
   display: flex;
-  gap: 10px;
+  overflow: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #00008b rgb(68, 192, 233);
+  gap: 20px;
 }
 .forecast > div {
-  border: 1px solid darkseagreen;
   background-color: var(--blue-light);
   border-radius: 20px;
   padding: 20px;
@@ -291,31 +368,38 @@ strong {
 .result {
   height: 200px;
   margin: 50px 0;
-  /* border: 5px solid plum; */
 }
 
 .result > div {
   display: flex;
   gap: 5px;
-  overflow: scroll;
+  overflow: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgb(68, 192, 233) #00008b;
 }
 
 .result > div > div {
-  border: 1px solid #000;
+  /* border: 1px solid #000; */
   border-radius: 10px;
   padding: 10px;
   flex-shrink: 0;
 }
 
 .nightBackground {
-  background-color: #00008b;
+  background-color: var(--blue-electric);
   color: white;
 }
 
 .dayBackground {
-  background-color: #fff8dc;
+  background-color: var(--yellow-day);
 }
 
+/* ---errorMessage */
+.error-message {
+  color: red;
+  font-size: 20px;
+  margin-top: 50px;
+}
 /* ---animation---------------- */
 @keyframes slideInOut {
   0% {

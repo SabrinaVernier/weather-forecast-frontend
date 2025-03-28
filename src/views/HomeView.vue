@@ -1,5 +1,5 @@
 <script setup>
-// import { RouterLink } from 'vue-router'
+import { RouterLink } from 'vue-router'
 
 import { onMounted, ref, computed } from 'vue'
 import L from 'leaflet' // ✅ Import de Leaflet
@@ -294,6 +294,11 @@ const getCityImage = async () => {
       <h1 class="first-h1">Météo du jour</h1>
 
       <h2 class="text-animation text-slide">=> Quel temps fait-il aujourd'hui ?</h2>
+      <h3>
+        <RouterLink :to="{ name: 'weather' }"
+          >accéder aux prévisions des jours à venir...</RouterLink
+        >
+      </h3>
       <div class="top-div">
         <div class="search">
           <section class="search-by-city">
@@ -462,7 +467,7 @@ main {
   border-radius: 10px;
   display: flex;
   flex-direction: column;
-  gap: 30px;
+  gap: 10px;
 }
 
 main > div > div {
@@ -486,6 +491,18 @@ strong {
 }
 em {
   font-style: italic;
+}
+h3 {
+  text-align: end;
+}
+h3 a {
+  color: var(--blue-light);
+  font-size: 16px;
+  text-decoration: none;
+}
+h3 a:hover {
+  color: var(--green-api);
+  font-size: 20px;
 }
 
 /* ---TOP-DIV------------------- */
@@ -591,6 +608,7 @@ form button {
   border-radius: 20px;
   padding: 20px;
   height: fit-content;
+  min-width: 400px;
   position: absolute;
   top: 20px;
   left: 50px;
