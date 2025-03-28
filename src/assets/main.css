@@ -7,6 +7,7 @@
 :root {
   --coral: coral;
   --blue-light: rgb(68, 192, 233);
+  --yellow: rgb(254, 254, 88);
   --green-light: #e6fdf5;
   --green-api: #70b42c;
   --green-back: #257a5d;
@@ -52,6 +53,15 @@ h3 {
   text-align: center;
 }
 
+h4 {
+  font-size: 18px;
+  text-decoration: underline;
+  margin-bottom: 20px;
+}
+
 img {
   display: block;
+}
+button:hover {
+  scale: 120%;
 }

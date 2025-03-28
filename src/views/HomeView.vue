@@ -11,6 +11,7 @@ let map = ref(null)
 const currentWeather = ref(null)
 const currentMarker = ref(null)
 const city = ref('')
+const zipCode = ref('')
 const errorMessage = ref('')
 const errorImage = ref('')
 
@@ -112,45 +113,70 @@ const prevWeather = async () => {
 
   const key = 'da3c0767563b48ddb4f160425252003'
 
-  try {
-    // 🔥 Récupération des coordonnées et icônes météo
-    const response = await axios.get(
-      `${url}/current.json?key=${key}&q=${city.value}&aqi=yes&lang=fr&alerts=yes`,
-    )
-    console.log('data>>>', response.data)
-    // currentWeather.value = data
+  if (city.value && !zipCode.value) {
+    try {
+      city.value = `${city.value},FR`
+      // 🔥 Récupération des coordonnées et icônes météo
+      const { data } = await axios.get(
+        `${url}/current.json?key=${key}&q=${city.value}&aqi=yes&lang=fr&alerts=yes`,
+      )
+      console.log('data>>>', data)
+      currentWeather.value = data
+      const { lat, lon } = data.location
+      const weatherIcon = 'https:' + data.current.condition.icon
 
-    const data = response.data
-    currentWeather.value = data
-    const { lat, lon } = data.location
-    const weatherIcon = 'https:' + data.current.condition.icon
+      console.log('location>>', data.location)
+      console.log('icon>>', weatherIcon)
 
-    console.log('location>>', data.location)
-    console.log('icon>>', weatherIcon)
+      weatherCondition.value = data.current.condition.text
+      cityInfos.value = data.location
+      updateBackground(weatherCondition.value)
+      city.value = city.value.slice(0, city.value.length - 3)
 
-    weatherCondition.value = data.current.condition.text
-    cityInfos.value = data.location
-    updateBackground(weatherCondition.value)
+      // 🔹 Ajout d'un marqueur avec icône météo
+      const weatherMarker = L.icon({
+        iconUrl: weatherIcon,
+        iconSize: [50, 50],
+        iconAnchor: [25, 50],
+      })
 
-    // 🔹 Ajout d'un marqueur avec icône météo
-    const weatherMarker = L.icon({
-      iconUrl: weatherIcon,
-      iconSize: [50, 50],
-      iconAnchor: [25, 50],
-    })
+      L.marker([lat, lon], { icon: weatherMarker })
+        .addTo(map.value)
+        .bindPopup(`⭐️ ${data.location.name} - ${data.current.temp_c}°C`)
+        .openPopup()
+    } catch (error) {
+      errorMessage.value = "❌ Ville non trouvée ! Veuillez vérifier l'orthographe"
+      console.log('error prevweather catch>>>', error)
+    }
+  } else if (!city.value && zipCode.value) {
+    const geoApiKey = '24cecf305a964996b3f969c6da16bb03'
+    zipCode.value = `${zipCode.value}, France`
 
-    L.marker([lat, lon], { icon: weatherMarker })
-      .addTo(map.value)
-      .bindPopup(`⭐️ ${data.location.name} - ${data.current.temp_c}°C`)
-      .openPopup()
-  } catch (error) {
-    errorMessage.value = "❌ Ville non trouvée ! Veuillez vérifier l'orthographe"
-    console.log('error prevweather catch>>>', error)
+    try {
+      const { data } = await axios.get(
+        `https://api.opencagedata.com/geocode/v1/json?q=${zipCode.value}&key=${geoApiKey}`,
+      )
+
+      console.log('data zip >>>', data)
+      const cityZip = data.results[0].components.city
+      console.log('cityzip>>>', cityZip)
+
+      zipCode.value = ''
+      city.value = cityZip
+      prevWeather()
+    } catch (error) {
+      console.log('error catch zipcode>>>', error)
+    }
+  } else if (!zipCode.value && !city.value) {
+    errorMessage.value = 'Veuillez remplir un des champs !'
+  } else {
+    errorMessage.value = 'Veuillez entrer un nom OU un code postal'
   }
 }
 
 // 📌 Fonction déclenchée au clic sur la carte
 const onMapClick = async (e) => {
+  city.value = ''
   if (!e || !e.latlng) {
     console.error('❌ Erreur : Événement de clic non valide', e)
     return
@@ -161,10 +187,10 @@ const onMapClick = async (e) => {
     map.value.removeLayer(currentMarker.value)
   }
 
-  latLong.value = `${e.latlng.lat},${e.latlng.lng}`
-  console.log('latLong>>>', latLong.value)
-
   try {
+    latLong.value = `${e.latlng.lat},${e.latlng.lng}`
+    console.log('latLong>>>', latLong.value)
+
     currentWeather.value = null
     urlArrayImage.value = []
 
@@ -266,26 +292,40 @@ const getCityImage = async () => {
   <main>
     <div class="container">
       <h1>Météo du jour</h1>
+
+      <h2 class="text-animation text-slide">=> Quel temps fait-il aujourd'hui ?</h2>
       <div class="top-div">
         <div class="search">
-          <h2 class="text-animation text-slide">=> Quel temps fait-il aujourd'hui ?</h2>
           <section class="search-by-city">
-            <p>Recherche par ville :</p>
+            <h4>Recherche par ville :</h4>
             <form @submit.prevent="prevWeather">
-              <label>
+              <label
+                >Name :
                 <input
                   type="text"
                   v-model="city"
                   name="city"
-                  placeholder="Paris"
-                  @click="errorMessage = ''"
+                  placeholder="Narbonne"
+                  @click="((errorMessage = ''), (zipCode = ''))"
+              /></label>
+
+              <p class="ou">OU</p>
+
+              <label
+                >Code Postal :
+                <input
+                  type="text"
+                  v-model="zipCode"
+                  name="zipCode"
+                  placeholder="11100"
+                  @click="((errorMessage = ''), (city = ''))"
               /></label>
               <button>Rechercher</button>
             </form>
           </section>
 
           <section class="search-by-map">
-            <p>Recherche sur la carte :</p>
+            <h4>Recherche sur la carte :</h4>
             <div id="map"></div>
           </section>
 
@@ -385,6 +425,7 @@ const getCityImage = async () => {
 
       <div class="bottom-div">
         <section class="section-city" v-if="city">
+          <h1 style="color: white">Visitez "{{ city }}"</h1>
           <div v-if="urlImage && !urlArrayImage" id="image-container">
             <img :src="urlImage" alt="image de la ville" />
           </div>
@@ -439,10 +480,24 @@ em {
 
 /* ---TOP-DIV------------------- */
 /* ---search---------- */
+form {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 20px;
+}
 form input {
   border-radius: 5px;
   padding: 5px;
   height: 30px;
+  border-color: var(--yellow);
+}
+form .ou {
+  font-style: italic;
+  font-weight: bold;
+  font-size: 20px;
+  color: var(--green-back);
+  align-self: center;
 }
 .top-div {
   display: flex;
@@ -460,6 +515,11 @@ form input {
   flex: 1;
 }
 /* ---searc-img--- */
+.search,
+.section-weather {
+  border: 1px solid #000;
+}
+
 .search-images button,
 form button {
   background: linear-gradient(
@@ -479,8 +539,8 @@ form button {
 }
 /* ----map------------ */
 #map {
-  width: 400px;
-  height: 450px;
+  width: 300px;
+  height: 300px;
   border-radius: 10px;
   margin: 10px auto;
   z-index: 1;
@@ -496,7 +556,7 @@ form button {
   width: 100%;
   height: 100%;
   border-radius: 20px;
-  margin-top: 50px;
+  /* margin-top: 50px; */
   background-size: cover;
   background-position: center;
   transition: background 0.5s ease-in-out;
@@ -507,13 +567,11 @@ form button {
 .result {
   height: 600px;
   width: 100%;
-  /* border: 5px solid plum; */
 }
 
 /* ---div-absolute-------- */
 
 .div-absolute {
-  /* border: 1px solid plum; */
   border-radius: 20px;
   padding: 20px;
   height: fit-content;
@@ -565,7 +623,7 @@ form button {
   display: flex;
   gap: 10px;
   flex-wrap: wrap;
-  box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.2);
+  /* box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.2); */
   /* border: 1px solid #000; */
 }
 #image-container > div {
@@ -574,9 +632,9 @@ form button {
 }
 #image-container img {
   max-width: 100%;
-  height: auto;
+  aspect-ratio: 16 / 9;
   border-radius: 15px;
-  box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.2);
+
   transition: transform 0.3s ease-in-out;
 }
 
