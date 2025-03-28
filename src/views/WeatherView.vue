@@ -10,6 +10,7 @@ const displayPerHour = ref(false)
 const dayIndex = ref(null)
 const city = ref('Narbonne')
 const days = ref(3)
+const cityInfos = ref('') // Stocke les infos de la ville
 const qualityAirValue = ref('')
 const backgroundColor = ref('')
 
@@ -24,6 +25,7 @@ const prevWeather = async () => {
     )
     console.log('data>>>', data)
     currentWeather.value = data
+    cityInfos.value = data.location
   } catch (error) {
     console.log('error catch>>>', error)
   }
@@ -129,7 +131,12 @@ const whatDay = (date) => {
         </form>
       </section>
 
-      <h3>Prévisions par jour</h3>
+      <h3>
+        Prévisions pour <strong>{{ cityInfos.name }}</strong
+        >, <span class="span-uppercase">{{ cityInfos.region }}</span
+        >,
+        {{ cityInfos.country }}
+      </h3>
       <section v-if="currentWeather" class="forecast">
         <div
           class="per-day"
@@ -173,7 +180,7 @@ const whatDay = (date) => {
       </section>
 
       <section class="result">
-        <h3>Prévisions (par heure) du jour choisi</h3>
+        <h3>Prévisions par heure</h3>
         <div v-if="currentWeather && displayPerHour">
           <div
             class="per-hour"
@@ -209,6 +216,9 @@ main {
   display: flex;
   flex-direction: column;
   gap: 30px;
+}
+h3 {
+  color: var(--green-back);
 }
 
 /* ---form------- */
@@ -249,6 +259,13 @@ form button {
 }
 
 /* --per-day */
+
+.span-uppercase {
+  text-transform: uppercase;
+}
+strong {
+  font-weight: bold;
+}
 .per-day img {
   padding: 20px 0;
 }

@@ -289,15 +289,15 @@ const getCityImage = async () => {
 </script>
 
 <template>
-  <main>
+  <main class="main-homeview">
     <div class="container">
-      <h1>Météo du jour</h1>
+      <h1 class="first-h1">Météo du jour</h1>
 
       <h2 class="text-animation text-slide">=> Quel temps fait-il aujourd'hui ?</h2>
       <div class="top-div">
         <div class="search">
           <section class="search-by-city">
-            <h4>Recherche par ville :</h4>
+            <h4>Recherche par VILLE</h4>
             <form @submit.prevent="prevWeather">
               <label
                 >Name :
@@ -325,16 +325,8 @@ const getCityImage = async () => {
           </section>
 
           <section class="search-by-map">
-            <h4>Recherche sur la carte :</h4>
+            <h4>Recherche sur la CARTE</h4>
             <div id="map"></div>
-          </section>
-
-          <section class="search-images">
-            <div>
-              <button v-if="city" @click="getCityImage()">
-                Images de la ville et les alentours
-              </button>
-            </div>
           </section>
         </div>
         <section class="section-weather">
@@ -423,9 +415,19 @@ const getCityImage = async () => {
         </section>
       </div>
 
-      <div class="bottom-div">
-        <section class="section-city" v-if="city">
-          <h1 style="color: white">Visitez "{{ city }}"</h1>
+      <div class="bottom-div" v-if="city">
+        <section class="section-city">
+          <h1 style="color: white">
+            Visitez "<span class="span-city">{{
+              `${city.slice(0, 1).toUpperCase()}${city.slice(1, city.length).toLowerCase()}`
+            }}</span
+            >"
+          </h1>
+
+          <div class="search-images">
+            <button v-if="city" @click="getCityImage()">Images de la ville et les alentours</button>
+          </div>
+
           <div v-if="urlImage && !urlArrayImage" id="image-container">
             <img :src="urlImage" alt="image de la ville" />
           </div>
@@ -448,10 +450,15 @@ main {
   background-size: cover;
   /* padding: 20px 50px; */
 }
+.first-h1 {
+  background-image: url('../assets/Imgs/N-nature-verte4.jpg');
+  background-clip: text;
+  color: transparent;
+}
 
 .container {
-  background-color: var(--green-light);
-  border: 10px groove var(--green-dark);
+  background-color: #fff;
+  /* border: 10px groove var(--green-dark); */
   border-radius: 10px;
   display: flex;
   flex-direction: column;
@@ -459,14 +466,17 @@ main {
 }
 
 main > div > div {
-  background-color: #fff;
+  /* background-color: #fff; */
+  background-color: var(--green-light);
+  border: 10px groove var(--green-dark);
+  border-radius: 10px;
   padding: 10px;
   /* border: 1px solid red; */
 }
 
 section {
   flex: 1;
-  padding: 20px;
+  padding: 10px;
 }
 p {
   margin: 5px 0;
@@ -484,7 +494,7 @@ form {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  gap: 20px;
+  gap: 10px;
 }
 form input {
   border-radius: 5px;
@@ -515,10 +525,6 @@ form .ou {
   flex: 1;
 }
 /* ---searc-img--- */
-.search,
-.section-weather {
-  border: 1px solid #000;
-}
 
 .search-images button,
 form button {
@@ -536,6 +542,16 @@ form button {
   margin-left: 30px;
   border-radius: 10px;
   border: none;
+}
+
+.search-images {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.search-images button {
+  margin: 20px 0;
 }
 /* ----map------------ */
 #map {
@@ -565,7 +581,7 @@ form button {
   /* scale: 80%; */
 }
 .result {
-  height: 600px;
+  height: 100%;
   width: 100%;
 }
 
@@ -576,14 +592,15 @@ form button {
   padding: 20px;
   height: fit-content;
   position: absolute;
-  top: 50px;
-  left: 100px;
+  top: 20px;
+  left: 50px;
   display: flex;
   flex-direction: column;
   gap: 10px;
   justify-content: center;
   align-items: flex-start;
   color: white;
+  scale: 80%;
 }
 
 :is(.div-abolute p, .div-absolute h1, .div-absolute h2) {
@@ -619,12 +636,13 @@ form button {
   background-color: black;
   border-radius: 10px;
 }
+.span-city::first-letter {
+  text-transform: uppercase;
+}
 #image-container {
   display: flex;
   gap: 10px;
   flex-wrap: wrap;
-  /* box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.2); */
-  /* border: 1px solid #000; */
 }
 #image-container > div {
   flex-shrink: 0;
@@ -634,12 +652,11 @@ form button {
   max-width: 100%;
   aspect-ratio: 16 / 9;
   border-radius: 15px;
-
   transition: transform 0.3s ease-in-out;
 }
 
 #image-container img:hover {
-  transform: scale(1.05);
+  transform: scale(2);
 }
 
 /* ---errorMessage */
