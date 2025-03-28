@@ -263,6 +263,7 @@ const airQuality = (index) => {
 // ---fonction pour obtenir les noms d'images de la ville------
 const getCityImage = async () => {
   try {
+    errorImage.value = ''
     const accessKey = 'TUeT7BZVWBAdhFowpcRlOYJICqIDDiZ35j_KDaFRnok' // Remplace par ta clé API
 
     const { data } = await axios.get(
@@ -289,8 +290,8 @@ const getCityImage = async () => {
 </script>
 
 <template>
-  <main class="main-homeview">
-    <div class="container">
+  <main id="main-homeview">
+    <div class="container" id="container">
       <h1 class="first-h1">Météo du jour</h1>
 
       <h2 class="text-animation text-slide">=> Quel temps fait-il aujourd'hui ?</h2>
@@ -453,7 +454,6 @@ main {
   background-image: url('../assets/Imgs/N-nature-verte4.jpg');
   background-repeat: no-repeat;
   background-size: cover;
-  /* padding: 20px 50px; */
 }
 .first-h1 {
   background-image: url('../assets/Imgs/N-nature-verte4.jpg');
@@ -463,7 +463,6 @@ main {
 
 .container {
   background-color: #fff;
-  /* border: 10px groove var(--green-dark); */
   border-radius: 10px;
   display: flex;
   flex-direction: column;
@@ -471,12 +470,10 @@ main {
 }
 
 main > div > div {
-  /* background-color: #fff; */
   background-color: var(--green-light);
   border: 10px groove var(--green-dark);
   border-radius: 10px;
   padding: 10px;
-  /* border: 1px solid red; */
 }
 
 section {
@@ -581,15 +578,11 @@ form button {
 }
 
 /* -----response-------- */
-.bottom-div {
-  width: 100%;
-}
 
 .weather-container {
   width: 100%;
   height: 100%;
   border-radius: 20px;
-  /* margin-top: 50px; */
   background-size: cover;
   background-position: center;
   transition: background 0.5s ease-in-out;
@@ -650,6 +643,9 @@ form button {
 
 /* ---BOTTOM-DIV---------------- */
 /* ---section city --------- */
+.bottom-div {
+  width: 100%;
+}
 .section-city {
   background-color: black;
   border-radius: 10px;

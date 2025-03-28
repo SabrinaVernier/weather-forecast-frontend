@@ -1,0 +1,86 @@
+/* -----max-width:px----- */
+
+#container {
+  background-color: rgb(247, 247, 174);
+}
+
+/* HEADER */
+#header > div {
+  gap: 50px;
+}
+#header > div a {
+  font-size: 16px;
+}
+/* HOMEVIEW */
+/* --------------- */
+#main-homeview .top-div {
+  flex-direction: column;
+  min-width: 350px;
+  height: 100%;
+}
+#main-homeview .section-weather .result {
+  width: 100%;
+  height: 500px;
+}
+#main-homeview .div-absolute {
+  top: -30px;
+  min-width: 300px;
+}
+#main-homeview form {
+  align-items: center;
+}
+#main-homeview form button {
+  align-self: flex-end;
+}
+#main-homeview .text-animation,
+#main-weatherview .text-slide {
+  font-size: 20px;
+}
+#main-homeview h3 a {
+  font-size: 11px;
+}
+#main-homeview h3 a:hover {
+  font-size: 12px;
+}
+/* ---------------- */
+#main-homeview #image-container > div {
+  width: calc((100% - 20px) / 2);
+}
+
+#main-homeview #image-container img:hover {
+  transform: scale(1.5);
+}
+
+/* WEATHERVIEW */
+/* ----------------- */
+#main-weatherview form {
+  flex-direction: column;
+  gap: 20px;
+}
+
+#main-weatherview .per-day > div,
+#main-weatherview p {
+  font-size: 11px;
+}
+
+#main-weatherview .p1 {
+  font-size: 16px;
+}
+#main-weatherview .forecast {
+  gap: 10px;
+}
+/* ---errorMessage */
+#main-homeview .error-message,
+#main-weatherview .error-message {
+  font-size: 16px;
+}
+/* FOOTER */
+#footer p {
+  font-size: 11px;
+}
+#footer a {
+  font-size: 12px;
+}
+#footer img {
+  scale: 80%;
+}

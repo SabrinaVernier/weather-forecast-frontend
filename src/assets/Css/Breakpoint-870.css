@@ -1,0 +1,24 @@
+/* -----max-width:870px----- */
+
+#container {
+  background-color: lightpink;
+}
+
+/* HOMEVIEW */
+/* --------------- */
+#main-homeview .div-absolute {
+  top: 0;
+  left: -30px;
+  min-width: 300px;
+}
+#main-homeview .div-absolute > div:not(:first-child) {
+  align-self: center;
+}
+
+/* ---------------- */
+#main-homeview #image-container > div {
+  width: calc((100% - 20px) / 3);
+}
+
+/* WEATHERVIEW */
+/* ----------------- */

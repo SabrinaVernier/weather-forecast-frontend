@@ -1,5 +1,8 @@
 @import './base.css';
 
+@import '../assets/Css/Breakpoint-870.css' (max-width: 870px);
+@import '../assets/Css/Breakpoint-700.css' (max-width: 700px);
+
 * {
   box-sizing: border-box;
 }
@@ -14,6 +17,12 @@
   --green-api: #70b42c;
   --green-back: #257a5d;
   --green-dark: #083929;
+
+  /* -----container-------- */
+  --container-width: 1200px;
+  /* ------responsive------ */
+  --container-width-bp-870: 600px;
+  --container-width-bp-700: 350px;
 }
 
 body {
@@ -21,7 +30,7 @@ body {
 }
 
 .container {
-  width: 1200px;
+  max-width: var(--container-width);
   margin: 0 auto;
   padding: 20px;
 }
@@ -30,7 +39,6 @@ main {
   min-height: 100vh;
   margin-top: 100px;
   padding-bottom: 50px;
-  /* padding: 20px; */
 }
 
 :is(h1, h2, h3) {
@@ -67,4 +75,29 @@ img {
 }
 button:hover {
   scale: 120%;
+}
+
+@media (max-width: 870px) {
+  #container {
+    min-width: var(--container-width-bp-870);
+  }
+}
+
+@media (max-width: 700px) {
+  #container {
+    min-width: var(--container-width-bp-700);
+  }
+  h1,
+  .first-h1 {
+    font-size: 34px;
+  }
+  h2 {
+    font-size: 18px;
+  }
+  h3 {
+    font-size: 16px;
+  }
+  button {
+    scale: 80%;
+  }
 }

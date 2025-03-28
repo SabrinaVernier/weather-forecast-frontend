@@ -3,7 +3,7 @@
 </script>
 
 <template>
-  <header>
+  <header id="header">
     <div class="container">
       <RouterLink :to="{ name: 'home' }">Météo du jour</RouterLink>
       <RouterLink :to="{ name: 'weather' }">Prévisions</RouterLink>

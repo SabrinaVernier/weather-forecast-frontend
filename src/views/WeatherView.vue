@@ -137,8 +137,8 @@ const whatDay = (date) => {
 </script>
 
 <template>
-  <main>
-    <div class="container">
+  <main id="main-weatherview">
+    <div class="container" id="container">
       <h1>Prévisions <br /><em>(jusqu'à 14 jours)</em></h1>
 
       <section class="search">
@@ -366,8 +366,8 @@ strong {
 /* ---per-hour */
 
 .result {
-  height: 200px;
-  margin: 50px 0;
+  height: fit-content;
+  margin-top: 50px;
 }
 
 .result > div {

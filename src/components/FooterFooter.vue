@@ -3,10 +3,12 @@
 </script>
 
 <template>
-  <footer>
+  <footer id="footer">
     <div class="container">
       <h2>
-        Powered by <a href="https://www.weatherapi.com/" title="Free Weather API">WeatherAPI.com</a>
+        Powered by <br /><a href="https://www.weatherapi.com/" title="Free Weather API"
+          >WeatherAPI.com</a
+        >
       </h2>
 
       <a href="https://www.weatherapi.com/" title="Free Weather API"
